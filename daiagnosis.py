@@ -3,7 +3,7 @@ import pandas as pd
 
 # Load the Excel file
 file_path = 'daiagnosis_rawdata.xlsx'
-df = pd.read_excel(file_path, sheet_name=0)
+df = pd.read_excel(file_path)
 
 # Function to calculate dosha percentages
 def calculate_dosha_percentages(df, responses):

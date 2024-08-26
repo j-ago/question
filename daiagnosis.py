@@ -1,9 +1,10 @@
 import streamlit as st
 import pandas as pd
+import matplotlib.pyplot as plt
 
 # Load the Excel file
-file_path = 'daiagnosis_rawdata.xlsx'
-df = pd.read_excel(file_path)
+file_path = 'path_to_your_file.xlsx'
+df = pd.read_excel(file_path, sheet_name=0)
 
 # Function to calculate dosha percentages
 def calculate_dosha_percentages(df, responses):
@@ -22,6 +23,16 @@ def calculate_dosha_percentages(df, responses):
     kapha_percentage = (kapha_score / total_score) * 100
     
     return vata_percentage, pitta_percentage, kapha_percentage
+
+# Function to display the dosha description
+def display_dosha_description(dosha):
+    descriptions = {
+        'Vata': 'Vataは風や空気のエネルギーを持つ体質で、動きや変化を象徴します。想像力豊かで活動的ですが、不安や不眠になりやすい傾向があります。',
+        'Pitta': 'Pittaは火と水のエネルギーを持つ体質で、変換や代謝を象徴します。強いリーダーシップと決断力を持ちますが、怒りっぽくなることがあります。',
+        'Kapha': 'Kaphaは水と地のエネルギーを持つ体質で、安定性や持久力を象徴します。穏やかで忍耐強いですが、怠けがちになることがあります。',
+        'Tri Dosha': 'Tri DoshaはVata、Pitta、Kaphaがバランスよく存在する理想的な体質です。健康と安定が保たれやすいですが、全体のバランスが重要です。'
+    }
+    st.write(descriptions[dosha])
 
 # Streamlit UI
 st.title('体質診断質問票（簡易版2024）')
@@ -57,14 +68,31 @@ if st.button('診断結果を表示'):
     st.write(f'Pitta: {pitta_percentage:.2f}%')
     st.write(f'Kapha: {kapha_percentage:.2f}%')
     
-    # Determine Dosha
+    # Display Pie Chart
+    labels = ['Vata', 'Pitta', 'Kapha']
+    sizes = [vata_percentage, pitta_percentage, kapha_percentage]
+    colors = ['#ff9999','#66b3ff','#99ff99']
+    
+    fig, ax = plt.subplots()
+    ax.pie(sizes, labels=labels, autopct='%1.1f%%', colors=colors, startangle=90)
+    ax.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle.
+    
+    st.pyplot(fig)
+    
+    # Determine Dosha and Display Description
     if 28 <= vata_percentage <= 38 and 28 <= pitta_percentage <= 38 and 28 <= kapha_percentage <= 38:
-        st.write('あなたの体質は: Tri Dosha')
+        dosha = 'Tri Dosha'
     elif vata_percentage > pitta_percentage and vata_percentage > kapha_percentage:
-        st.write('あなたの体質は: Vata')
+        dosha = 'Vata'
     elif pitta_percentage > vata_percentage and pitta_percentage > kapha_percentage:
-        st.write('あなたの体質は: Pitta')
+        dosha = 'Pitta'
     elif kapha_percentage > vata_percentage and kapha_percentage > pitta_percentage:
-        st.write('あなたの体質は: Kapha')
+        dosha = 'Kapha'
+    else:
+        dosha = None
+    
+    if dosha:
+        st.write(f'あなたの体質は: {dosha}')
+        display_dosha_description(dosha)
     else:
         st.write('診断に失敗しました。')

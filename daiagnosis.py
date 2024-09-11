@@ -3,7 +3,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 # Load the Excel file
-file_path = 'daiagnosis_rawdata.xlsx'
+file_path = 'daiagnosis_rawdata.xlsx'  # 実際のExcelファイルのパスに変更してください
 df = pd.read_excel(file_path, sheet_name=0)
 
 # Function to calculate dosha percentages
@@ -37,7 +37,7 @@ def display_dosha_description(dosha):
 # Streamlit UI
 st.title('体質診断質問票（簡易版2024）')
 
-st.write('各質問内容を見て、最も自分に当てはまる「状況・状態」に「はい」を押してください。')
+st.write('各質問内容を見て、最も自分に当てはまる「状況・状態」を選んでください。')
 
 responses = {
     'Vata': [],
@@ -45,21 +45,23 @@ responses = {
     'Kapha': []
 }
 
+# Display each question with radio buttons
 for i in range(len(df)):
-    st.write(df.iloc[i, 1])  # Display the question
-    vata_col, pitta_col, kapha_col = st.columns(3)
+    st.write(f"質問 {i+1}: {df.iloc[i, 1]}")  # Display the question
     
-    with vata_col:
-        response_vata = st.radio(df.iloc[i, 2], ["はい", "いいえ"], index=1, key=f'vata_{i}')
-        responses['Vata'].append(1 if response_vata == "はい" else 0)
+    # Display options with empty radio buttons for selection
+    choice = st.radio(
+        "選択してください:", 
+        options=['Vata', 'Pitta', 'Kapha'], 
+        format_func=lambda x: {'Vata': df.iloc[i, 2], 'Pitta': df.iloc[i, 4], 'Kapha': df.iloc[i, 6]}[x], 
+        key=f'choice_{i}',
+        label_visibility="collapsed"  # Hide the label to keep the UI clean
+    )
     
-    with pitta_col:
-        response_pitta = st.radio(df.iloc[i, 4], ["はい", "いいえ"], index=1, key=f'pitta_{i}')
-        responses['Pitta'].append(1 if response_pitta == "はい" else 0)
-    
-    with kapha_col:
-        response_kapha = st.radio(df.iloc[i, 6], ["はい", "いいえ"], index=1, key=f'kapha_{i}')
-        responses['Kapha'].append(1 if response_kapha == "はい" else 0)
+    # Count responses based on selection
+    responses['Vata'].append(1 if choice == 'Vata' else 0)
+    responses['Pitta'].append(1 if choice == 'Pitta' else 0)
+    responses['Kapha'].append(1 if choice == 'Kapha' else 0)
 
 if st.button('診断結果を表示'):
     vata_percentage, pitta_percentage, kapha_percentage = calculate_dosha_percentages(df, responses)

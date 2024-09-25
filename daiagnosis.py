@@ -37,7 +37,8 @@ def display_dosha_description(dosha):
 # Streamlit UI
 st.title('体質診断質問票（簡易版2024）')
 
-st.write('各質問内容を見て、最も自分に当てはまる「状況・状態」を選んでください。')
+# 更新された説明文
+st.write('各質問内容を見て、今の自分に最も近い「状況・状態」を選んでください。')
 
 responses = {
     'Vata': [],
@@ -49,7 +50,7 @@ responses = {
 for i in range(len(df)):
     st.write(f"質問 {i+1}: {df.iloc[i, 1]}")  # Display the question
     
-    # Display options with empty radio buttons for selection
+    # Display options with radio buttons for selection
     choice = st.radio(
         "選択してください:", 
         options=['Vata', 'Pitta', 'Kapha'], 
@@ -82,19 +83,30 @@ if st.button('診断結果を表示'):
     st.pyplot(fig)
     
     # Determine Dosha and Display Description
+    # Check for Tri Dosha first
     if 28 <= vata_percentage <= 38 and 28 <= pitta_percentage <= 38 and 28 <= kapha_percentage <= 38:
-        dosha = 'Tri Dosha'
-    elif vata_percentage > pitta_percentage and vata_percentage > kapha_percentage:
-        dosha = 'Vata'
-    elif pitta_percentage > vata_percentage and pitta_percentage > kapha_percentage:
-        dosha = 'Pitta'
-    elif kapha_percentage > vata_percentage and kapha_percentage > pitta_percentage:
-        dosha = 'Kapha'
+        doshas = ['Tri Dosha']
     else:
-        dosha = None
+        # Find the maximum percentage
+        max_percentage = max(vata_percentage, pitta_percentage, kapha_percentage)
+        # Find which doshas have this percentage
+        doshas = []
+        if vata_percentage == max_percentage:
+            doshas.append('Vata')
+        if pitta_percentage == max_percentage:
+            doshas.append('Pitta')
+        if kapha_percentage == max_percentage:
+            doshas.append('Kapha')
     
-    if dosha:
-        st.write(f'あなたの体質は: {dosha}')
-        display_dosha_description(dosha)
+    if doshas:
+        if 'Tri Dosha' in doshas:
+            dosha = 'Tri Dosha'
+            st.write(f'あなたの体質は: {dosha}')
+            display_dosha_description(dosha)
+        else:
+            dosha_text = ' と '.join(doshas)
+            st.write(f'あなたの体質は: {dosha_text}')
+            for d in doshas:
+                display_dosha_description(d)
     else:
         st.write('診断に失敗しました。')
